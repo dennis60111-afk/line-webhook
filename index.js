@@ -4,7 +4,7 @@ const app = express();
 app.use(express.json());
 
 // 填入你的設定
-const GOOGLE_SHEET_URL = '你的 Apps Script /exec 網址';
+const GOOGLE_SHEET_URL = 'https://script.google.com/macros/library/d/1E1Rw2E4w0PWoxz8_8KAaw0TmYgrzsAMS0r-Brx-hqvuPtUqNRbAhp5Af/4';
 
 app.post('/webhook', async (req, res) => {
   res.sendStatus(200); // 立刻回傳 200 給 LINE
