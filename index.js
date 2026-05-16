@@ -3,19 +3,38 @@ const axios = require('axios');
 const app = express();
 app.use(express.json());
 
-// 填入你的設定
 const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbzGDUTGbnZtiP0X0F7eGXVSln0dPB9Gv5NJNN2j5rBDnqFB3obNPBLxLbJkWJAW_SA/exec';
 
+// ✅ 新增：健康檢查端點（測試用）
+app.get('/', (req, res) => {
+  res.send('Webhook server is running ✅');
+});
+
+// ✅ 新增：完整 Log，方便除錯
 app.post('/webhook', async (req, res) => {
-  res.sendStatus(200); // 立刻回傳 200 給 LINE
+  console.log('=== 收到 LINE 請求 ===');
+  console.log(JSON.stringify(req.body, null, 2));
+  
+  res.sendStatus(200);
 
   const events = req.body.events || [];
+  if (events.length === 0) {
+    console.log('events 為空（Verify 用的測試請求）');
+    return;
+  }
+
   for (const event of events) {
     const userId = event.source?.userId;
+    console.log('userId:', userId, '/ event type:', event.type);
+    
     const displayName = await getDisplayName(userId);
+    console.log('displayName:', displayName);
+    
     if (userId) {
-      // 把 User ID 傳給 Apps Script 存入試算表
-      await axios.post(GOOGLE_SHEET_URL, { userId, displayName }).catch(() => {});
+      const result = await axios.post(GOOGLE_SHEET_URL, { userId, displayName }).catch(e => {
+        console.log('傳送到 Apps Script 失敗：', e.message);
+      });
+      console.log('Apps Script 回應：', result?.status);
     }
   }
 });
@@ -26,7 +45,11 @@ async function getDisplayName(userId) {
       headers: { Authorization: `Bearer ${process.env.LINE_TOKEN}` }
     });
     return res.data.displayName;
-  } catch { return '未知'; }
+  } catch (e) {
+    console.log('取得名稱失敗：', e.message);
+    return '未知';
+  }
 }
 
-app.listen(3000, () => console.log('Webhook running'));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Webhook running on port ${PORT}`));
