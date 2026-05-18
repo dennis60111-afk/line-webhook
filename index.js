@@ -3,7 +3,7 @@ const axios = require('axios');
 const app = express();
 app.use(express.json());
 
-const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbzGDUTGbnZtiP0X0F7eGXVSln0dPB9Gv5NJNN2j5rBDnqFB3obNPBLxLbJkWJAW_SA/exec';
+const GOOGLE_SHEET_URL = process.env.GOOGLE_SHEET_URL;
 
 // ✅ 新增：健康檢查端點（測試用）
 app.get('/', (req, res) => {
